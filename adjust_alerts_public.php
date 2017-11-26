@@ -4,7 +4,12 @@
 
 $apikey = "your-coinigy-api-key-here";
 $apisecret = "your-coinigy-secret-here";
-$pct_new_price = 0.90; #what fraction you want your prices changed to. below 1 lowers prices, above 1 raises them. For example 0.90 will change your alerts to 90% of their original values
+
+######
+$pct_new_price = 0.90; 
+#what fraction you want your prices changed to. 
+#below 1 lowers prices, above 1 raises them. 
+#For example 0.90 will change your alerts to 90% of their original values
 
 
 #get alerts
@@ -21,8 +26,8 @@ curl_close($ch);
 $s = json_decode($response, TRUE);
 
 
-foreach($s['data']['open_alerts'] as $x){
-    if($x["operator"] == ">") continue;
+foreach($s['data']['open_alerts'] as $x) {
+    if($x["operator"] == ">") continue; #this ignores alerts above the current price since those don't need to be lowered
     $alert_id = $x["alert_id"];
     $mkt_name = $x["mkt_name"];
     $price = $x["price"];
@@ -72,6 +77,4 @@ foreach($s['data']['open_alerts'] as $x){
 
     var_dump($response);
     sleep(5); #this is so we don't hit coinigy with too many api calls too quickly
-
-
-    }
+}
