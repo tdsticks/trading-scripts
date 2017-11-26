@@ -1,5 +1,5 @@
 #!/usr/bin/php
-#public domain
+//public domain
 <?php
 
 $apikey = "your-coinigy-api-key-here";
