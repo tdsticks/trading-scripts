@@ -1,6 +1,6 @@
 #!/usr/bin/php
-//public domain
 <?php
+//public domain
 
 $apikey = "your-coinigy-api-key-here";
 $apisecret = "your-coinigy-secret-here";
