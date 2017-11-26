@@ -4,7 +4,7 @@
 
 $apikey = "your-coinigy-api-key-here";
 $apisecret = "your-coinigy-secret-here";
-
+if($apikey == "your-coinigy-api-key-here") die("You have to put your coinigy api key and secret in the file\n");
 ######
 $pct_new_price = 0.90; 
 #what fraction you want your prices changed to. 
