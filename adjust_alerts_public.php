@@ -78,3 +78,4 @@ foreach($s['data']['open_alerts'] as $x) {
     var_dump($response);
     sleep(5); #this is so we don't hit coinigy with too many api calls too quickly
 }
+echo "FINISHED";
