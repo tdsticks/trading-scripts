@@ -6,8 +6,13 @@
 #for example: auto_sell.py ETH 0.014324823
 #simple as that
 
-import bittrex
 import sys
+try:
+    import bittrex
+except:
+    print("Get the api wrapper bittrex.py from https://github.com/ericsomdahl/python-bittrex")
+    sys.exit()
+
 import time
 import decimal
 
