@@ -3,7 +3,7 @@
 
 #Works with bitcoin since that's all I trade. Takes a symbol like NEO as the first argument and a rate like 0.014324823 as the second argument. It checks every so often
 #and when it sees you have a quantity of that coin like say when a buy is triggered, it puts it up for sale at that price.
-#for example: auto_buy.py ETH 0.014324823
+#for example: auto_sell.py ETH 0.014324823
 #simple as that
 
 import bittrex
