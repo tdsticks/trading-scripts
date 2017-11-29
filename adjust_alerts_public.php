@@ -10,7 +10,10 @@ $pct_new_price = 0.90;
 #what fraction you want your prices changed to. 
 #below 1 lowers prices, above 1 raises them. 
 #For example 0.90 will change your alerts to 90% of their original values
+#If you go with 0.90, then 1.11111111 will raise you back up to your original price.
 
+echo "Press enter to adjust prices by $pct_new_price\n";
+fgets(fopen("php://stdin", "r"));
 
 #get alerts
 $ch = curl_init();
