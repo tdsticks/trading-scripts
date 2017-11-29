@@ -7,6 +7,7 @@ $apisecret = "your-coinigy-secret-here";
 if($apikey == "your-coinigy-api-key-here") die("You have to put your coinigy api key and secret in the file\n");
 ######
 $pct_new_price = 0.90; 
+#$pct_new_price = 1.11111111;
 #what fraction you want your prices changed to. 
 #below 1 lowers prices, above 1 raises them. 
 #For example 0.90 will change your alerts to 90% of their original values
