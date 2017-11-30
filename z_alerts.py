@@ -6,7 +6,7 @@ import os
 import decimal
 import json
 
-os.system("./get_alerts.php")
+os.system("./z_get_alerts.php")
 for line in open("alerts.txt"): print(line)
 
 while True:
