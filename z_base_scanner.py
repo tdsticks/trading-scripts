@@ -9,6 +9,10 @@ import os
 import time
 import sys
 
+##################################################################################################
+#########################     PYTHON 3 is a must Python 2 will now work     ######################
+##################################################################################################
+
 ##############VARIABLES TO SET
 coinigykey = '---Your-coinigy-key-here---' #we need these to set the alerts
 coinigysec = '---Your-coinigy-secret-here---'
