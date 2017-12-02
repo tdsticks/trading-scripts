@@ -6,7 +6,6 @@ import time
 import json
 import decimal
 import os
-import time
 import sys
 try:
     from api_keys import coinigykey, coinigysec #coinigy api key and secret need to be set in api_keys.py
