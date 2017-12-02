@@ -8,14 +8,18 @@ import decimal
 import os
 import time
 import sys
+try:
+    from api_keys import coinigykey, coinigysec #coinigy api key and secret need to be set in api_keys.py
+    import z_manage_alerts
+except:
+    input("You need to download api_keys.py, put your coinigy keys in it, and download z_manage_alerts.py all from the project site")
+    sys.exit()
 
 ##################################################################################################
 #########################     PYTHON 3 is a must Python 2 will not work     ######################
 ##################################################################################################
 
 ##############VARIABLES TO SET
-coinigykey = '---Your-coinigy-key-here---' #we need these to set the alerts
-coinigysec = '---Your-coinigy-secret-here---'
 days = 14 #how far back to look for bases. Suggested at least 14 for base breaks and 1 for day trading
 skip = 6 #this is how many candles back from now we ignore when scanning for bases; has to be at least 6
 market = "BTC"
@@ -26,23 +30,20 @@ six_candle_up = 1.05 #how much higher the sixth candles from the base should be 
 sensitivity = 2 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1 or 2 seems to work best
 low_or_close = 3 #whether you want bases based on the low or the close (bottom of wick or candle respectively). 3 gives you low and 4 is close. (Also 0 is open and 1 is high if you want to go there)
 split_the_difference = False #Detects bases at 50% of wicks rather than the low or close prices. Setting this to True will cause the low_or_close variable to be ignored
+minimum_volume = 10 #Filters out all coins whose volume (in BTC in the last 24h) is less than this amount
 ###############VARIABLES TO SET
 
+
 if coinigykey == "---Your-coinigy-key-here---":
-    input("You need to put your coinigy key and secret in the file")
+    input("You need to put your coinigy key and secret in api_keys.py")
     sys.exit()
 
 summaries = urlopen("https://bittrex.com/api/v1.1/public/getmarketsummaries").read().decode("utf-8")
 summaries = json.loads(summaries)
 
 #get old alerts
-headers = {'Content-Type': 'application/json','X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
-values = '{"exch_code": "BTRX"}'
-values = bytes(values, encoding='utf-8')
-request = Request('https://api.coinigy.com/api/v1/alerts', data = values, headers = headers)
-old_alerts = urlopen(request).read()
-old_alerts = old_alerts.decode("utf-8")
-old_alerts = json.loads(old_alerts)
+alerts = z_manage_alerts.AlertManager(coinigykey, coinigysec)
+old_alerts = alerts._get_old_alerts()
 
 def check_dup_alerts(coin, price):
     for x in old_alerts['data']['open_alerts']:
@@ -54,8 +55,10 @@ def check_dup_alerts(coin, price):
 
 
 for coin in summaries['result']:
+    vol_base = coin['BaseVolume']
     coin = coin['MarketName']
-    if not market in coin or 'USDT' in coin: continue
+    if not market in coin or 'USDT' in coin or vol_base < minimum_volume:
+        continue
     coin = coin.split('-')[1]
     #coin = "ABY"
     print(coin)
@@ -108,7 +111,21 @@ for coin in summaries['result']:
                     headers = {'Content-Type': 'application/json','X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
                     request = Request('https://api.coinigy.com/api/v1/addAlert', data=values, headers=headers)
                     response_body = urlopen(request).read()
-                    print(response_body)
                     time.sleep(1)
+                    print(response_body)
+                    response_body = response_body.decode("utf-8")
+                    response_body = json.loads(response_body)
+                    new_alert = alerts._get_old_alerts()['data']['open_alerts'][-1]
+                    time.sleep(1)
+                    print(new_alert)
+                    if new_alert['mkt_name'] == coin + '/' + market:
+                        open("alerts_set.txt", "a").write(
+                                                          str(time.time()) + "\t" + 
+                                                          new_alert["alert_id"] + "\t" + 
+                                                          new_alert["alert_added"] + "\t" +
+                                                          new_alert["price"] + "\t" +
+                                                          new_alert["exch_code"] + "\t" +
+                                                          new_alert["mkt_name"] + "\n"
+                                                      )
                     break
 input("FINISHED")
