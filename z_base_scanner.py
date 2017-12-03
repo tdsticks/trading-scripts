@@ -160,4 +160,4 @@ for coin in coins:
                                                           new_alert["mkt_name"] + "\n"
                                                       )
                     break
-#input("FINISHED")
+input("FINISHED")
