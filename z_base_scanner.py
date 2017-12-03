@@ -25,7 +25,7 @@ market = "BTC"
 minutes = "60" #candle time interval. suggested 60 for regular base breaks, 3 for day trading
 drop = .96 #percentage below detected bases to set alert so .96 is 4% down. Suggest at least .96 or .95 for regular base breaks and .97 for day trading
 six_candle_up = 1.08 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05 for 1 hour and 1.03 for 3 minute day trading candles
-sensitivity = 3 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1 or 2 seems to work best
+sensitivity = 3 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1, 2, or 3 seem to work best
 low_or_close = 3 #whether you want bases based on the low or the close (bottom of wick or candle respectively). 3 gives you low and 4 is close. (Also 0 is open and 1 is high if you want to go there)
 split_the_difference = False #Detects bases at 50% of wicks rather than the low or close prices. Setting this to True will cause the low_or_close variable to be ignored
 if len(sys.argv) > 1:
