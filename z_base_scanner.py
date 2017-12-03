@@ -21,7 +21,7 @@ except:
 ##############VARIABLES TO SET
 days = 60 #how far back to look for bases. Suggested at least 14 for base breaks and 1 for day trading
 skip = 6 #this is how many candles back from now we ignore when scanning for bases; has to be at least 6
-market = "ETH"
+market = "ETH" #Market like BTC or ETH
 minutes = "60" #candle time interval. suggested 60 for regular base breaks, 3 for day trading
 drop = .96 #percentage below detected bases to set alert so .96 is 4% down. Suggest at least .96 or .95 for regular base breaks and .97 for day trading
 six_candle_up = 1.05 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05 for 1 hour and 1.03 for 3 minute day trading candles
