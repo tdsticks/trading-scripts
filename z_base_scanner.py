@@ -32,7 +32,7 @@ if len(sys.argv) > 1:
     exchange = sys.argv[1]
     minimum_volume = int(sys.argv[2])
 else:
-    exchange = "CPIA"
+    exchange = "BTRX"
     minimum_volume = 10 #Filters out all coins whose volume (in BTC in the last 24h) is less than this amount
 ###############VARIABLES TO SET
 
