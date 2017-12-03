@@ -131,7 +131,7 @@ for coin in coins:
                 if c[x + 3] < c[x + 1]: strikes += 1
                 if c[x + 4] < c[x + 2]: strikes += 1
                 if c[x + 5] < c[x + 3]: strikes += 1
-                print("%d strike(s) against this base" % strikes)
+                print(str(strikes) + " strike(s) against base at candle " + str(x))
                 if strikes <= sensitivity and not check_dup_alerts(coin + "/" + market, y * drop) and last_price > y * drop:
                     print("Base at candle " + str(x))
                     print("Base price " + str(round(decimal.Decimal(y), 8)))
