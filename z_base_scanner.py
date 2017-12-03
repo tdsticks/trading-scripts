@@ -21,11 +21,11 @@ except:
 ##############VARIABLES TO SET
 days = 60 #how far back to look for bases. Suggested at least 14 for base breaks and 1 for day trading
 skip = 6 #this is how many candles back from now we ignore when scanning for bases; has to be at least 6
-market = "BTC" #Market like BTC or ETH
+market = "BTC"
 minutes = "60" #candle time interval. suggested 60 for regular base breaks, 3 for day trading
 drop = .96 #percentage below detected bases to set alert so .96 is 4% down. Suggest at least .96 or .95 for regular base breaks and .97 for day trading
-six_candle_up = 1.05 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05 for 1 hour and 1.03 for 3 minute day trading candles
-sensitivity = 2 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1 or 2 seems to work best
+six_candle_up = 1.08 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05 for 1 hour and 1.03 for 3 minute day trading candles
+sensitivity = 3 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1 or 2 seems to work best
 low_or_close = 3 #whether you want bases based on the low or the close (bottom of wick or candle respectively). 3 gives you low and 4 is close. (Also 0 is open and 1 is high if you want to go there)
 split_the_difference = False #Detects bases at 50% of wicks rather than the low or close prices. Setting this to True will cause the low_or_close variable to be ignored
 if len(sys.argv) > 1:
@@ -33,7 +33,7 @@ if len(sys.argv) > 1:
     minimum_volume = int(sys.argv[2])
 else:
     exchange = "BTRX"
-    minimum_volume = 10 #Filters out all coins whose volume (in base coin in the last 24h) is less than this amount
+    minimum_volume = 1 #Filters out all coins whose volume (in base coin in the last 24h) is less than this amount
 ###############VARIABLES TO SET
 
 
@@ -83,9 +83,10 @@ def check_dup_alerts(coin, price):
 
 coins = get_coins(exchange)
 for coin in coins:
-    print(coin)
+    print("\n" + coin)
     vol_base = get_coin_price_volume(exchange, coin + '/' + market)
     try:
+        last_price = float(vol_base['data'][0]['last_trade'])
         vol_base = float(vol_base['data'][0]['current_volume']) * float(vol_base['data'][0]['last_trade'])
     except:
         print(vol_base)
@@ -112,8 +113,8 @@ for coin in coins:
 
     l = []
 
-    strikes = 0
     for x, y in enumerate(c):
+        strikes = 0
         if (x < skip or x > len(c) - (skip + 1)): continue
         l.append(y)
         if (c[x - 1] >= y and
@@ -130,8 +131,8 @@ for coin in coins:
                 if c[x + 3] < c[x + 1]: strikes += 1
                 if c[x + 4] < c[x + 2]: strikes += 1
                 if c[x + 5] < c[x + 3]: strikes += 1
-                if strikes <= sensitivity and not check_dup_alerts(coin + "/" + market, y * drop):
-                    print(str(strikes) + " strike(s) against this base")
+                print("%d strike(s) against this base" % strikes)
+                if strikes <= sensitivity and not check_dup_alerts(coin + "/" + market, y * drop) and last_price > y * drop:
                     print("Base at candle " + str(x))
                     print("Base price " + str(round(decimal.Decimal(y), 8)))
                     print("Alert price " + str(round(decimal.Decimal(y * drop), 8)))
