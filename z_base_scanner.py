@@ -127,6 +127,8 @@ for coin in coins:
             c[x + 1] >= y and
             c[x - 2] >= y and
             c[x + 2] >= y and
+            c[x - 3] > y and
+            c[x + 3] > y and            
             y <= min(l) and
             c[x - 6] >= y * six_candle_up and
             c[x - 6] - y > 0.00000002 and #To eliminate false positives for low sat coins like DOGE and RDD
