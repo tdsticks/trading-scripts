@@ -15,6 +15,7 @@ except:
     sys.exit()
 
 open("alerts_set.txt", "a")
+open("alerts_deleted.txt", "a")
 
 ##################################################################################################
 #########################     PYTHON 3 is a must Python 2 will not work     ######################
@@ -34,9 +35,11 @@ delete_old_alerts = True #If you want to delete all old alerts in alerts_set.txt
 if len(sys.argv) > 1:
     exchange = sys.argv[1]
     minimum_volume = int(sys.argv[2])
+    market = sys.argv[3]
 else:
     exchange = "BTRX"
     minimum_volume = 1 #Filters out all coins whose volume (in base coin in the last 24h) is less than this amount
+    market = "BTC"
 ###############VARIABLES TO SET
 
 
@@ -128,7 +131,7 @@ for coin in coins:
             c[x - 2] >= y and
             c[x + 2] >= y and
             c[x - 3] > y and
-            c[x + 3] > y and            
+            c[x + 3] > y and
             y <= min(l) and
             c[x - 6] >= y * six_candle_up and
             c[x - 6] - y > 0.00000002 and #To eliminate false positives for low sat coins like DOGE and RDD
@@ -155,8 +158,10 @@ for coin in coins:
 
                         #Delete old alerts for this coin
                         if delete_old_alerts:
+                            alerts_deleted = open("alerts_deleted.txt").readlines()
                             for line in open("alerts_set.txt"):
-                                if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + market and line.split("\t")[4].strip() == exchange:
+                                if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + market and line.split("\t")[4].strip() == exchange and not line in alerts_deleted:
+                                    open("alerts_deleted.txt", "a").write(line)
                                     notification_id = line.split("\t")[1].strip()
                                     delete_coins = z_manage_alerts.AlertManager(coinigykey, coinigysec)
                                     delete_coins._api_delete_alert(notification_id)
