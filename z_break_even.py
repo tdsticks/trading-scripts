@@ -9,7 +9,7 @@ try:
 except Exception as e:
     print(e)
     print("You need the bittrex.py api python wrapper from: https://github.com/ericsomdahl/python-bittrex/blob/master/bittrex/bittrex.py")
-
+    sys.exit()
 
 ####Put your key and secret here
 api_key='--your-bittrex-api-key-here--'
