@@ -4,10 +4,11 @@ import sys
 import decimal
 from urllib.request import urlopen
 import json
-#try:
-import bittrex
-#except:
-#    print("You need the bittrex.py api python wrapper from: https://github.com/ericsomdahl/python-bittrex/blob/master/bittrex/bittrex.py")
+try:
+    import bittrex
+except Exception as e:
+    print(e)
+    print("You need the bittrex.py api python wrapper from: https://github.com/ericsomdahl/python-bittrex/blob/master/bittrex/bittrex.py")
 
 
 ####Put your key and secret here
