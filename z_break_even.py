@@ -11,6 +11,7 @@ except Exception as e:
     print("You need the bittrex.py api python wrapper from: https://github.com/ericsomdahl/python-bittrex/blob/master/bittrex/bittrex.py")
     sys.exit()
 
+
 ####Put your key and secret here
 api_key='--your-bittrex-api-key-here--'
 api_secret='--your-bittrex-api-secret-here--'
@@ -34,8 +35,11 @@ $ break_even.py BTC-NEO
 This will give you results for the BTC-NEO trading pair""")
     sys.exit()
 
-balance = round(b.get_balance(symbol.split("-")[1])['result']['Balance'], 8)
-print(str(balance) + " balance")
+#balance = round(b.get_balance(symbol.split("-")[1])['result']['Balance'], 8)
+balance = b.get_balance(symbol.split("-")[1])
+print(balance)
+balance = round(balance['result']['Balance'], 8)
+#print(str(balance) + " balance")
 
 howfarback = 1000 #this is how many transactions to attempt to get for the coin. Default is an arbitrarily large number
 res = b.get_order_history(symbol, howfarback)
