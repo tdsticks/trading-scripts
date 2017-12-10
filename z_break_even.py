@@ -40,7 +40,7 @@ This will give you results for the BTC-NEO trading pair""")
 #balance = round(b.get_balance(symbol.split("-")[1])['result']['Balance'], 8)
 balance = b.get_balance(symbol.split("-")[1])
 print(balance)
-balance = round(balance['result']['Balance'], 8)
+balance = round(balance['result']['Balance'] + balance['result']['Available'], 8)
 #print(str(balance) + " balance")
 
 howfarback = 1000 #this is how many transactions to attempt to get for the coin. Default is an arbitrarily large number
