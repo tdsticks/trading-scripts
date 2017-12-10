@@ -10,8 +10,8 @@ except Exception as e:
     print(e)
     print("You need the bittrex.py api python wrapper from: https://github.com/ericsomdahl/python-bittrex/blob/master/bittrex/bittrex.py")
     sys.exit()
-
-
+  
+    
 ####Put your key and secret here
 api_key='--your-bittrex-api-key-here--'
 api_secret='--your-bittrex-api-secret-here--'
@@ -33,7 +33,9 @@ except:
 Example: 
 $ break_even.py BTC-NEO
 This will give you results for the BTC-NEO trading pair""")
-    sys.exit()
+    sys.exit()    
+  
+
 
 #balance = round(b.get_balance(symbol.split("-")[1])['result']['Balance'], 8)
 balance = b.get_balance(symbol.split("-")[1])
