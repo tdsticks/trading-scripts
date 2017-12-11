@@ -13,6 +13,8 @@ except Exception as e:
     sys.exit()
 
 
+alerted = []
+
 while True:
     coinigy_alerts = z_manage_alerts.AlertManager._get_old_alerts()
     btrx_summaries = requests.get("https://bittrex.com/api/v1.1/public/getmarketsummaries")
@@ -28,16 +30,18 @@ while True:
         coinigy_mkt_name = alert['mkt_name'].split('/')[1] + '-' + alert['mkt_name'].split('/')[0]
         for summary in btrx_summaries['result']:
             if coinigy_mkt_name == summary['MarketName']:
-                if alert['operator'] == '>' and summary['Last'] > alert['price']:
+                if alert['operator'] == '>' and summary['Last'] > alert['price'] and not alert in alerted:
                     print("\n" + summary['MarketName'] + " above " + str(round(decimal.Decimal(alert['price']), 8)))
                     print("https://www.coinigy.com/main/markets/BTRX/" + alert['mkt_name'])
                     print("https://bittrex.com/Market/Index?MarketName=" + summary['MarketName'])
                     os.system("mpv os.mp3  >/dev/null 2>&1")
+                    alerted.append(alert)
 
-                if alert['operator'] == '<' and summary['Last'] < alert['price']:
+                if alert['operator'] == '<' and summary['Last'] < alert['price'] and not alert in alerted:
                     print("\n" + summary['MarketName'] + " below " + str(round(decimal.Decimal(alert['price']), 8)))
                     print("https://www.coinigy.com/main/markets/BTRX/" + alert['mkt_name'])
                     print("https://bittrex.com/Market/Index?MarketName=" + summary['MarketName'])
                     os.system("mpv os.mp3  >/dev/null 2>&1")
+                    alerted.append(alert)
 
     time.sleep(15) #Do not lower this below 2 or coinigy might end up banning you
