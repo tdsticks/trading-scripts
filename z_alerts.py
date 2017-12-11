@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import time
-import bittrex
 import os
 import decimal
 import json
