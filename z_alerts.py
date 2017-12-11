@@ -17,7 +17,12 @@ except Exception as e:
 while True:
     coinigy_alerts = z_manage_alerts.AlertManager._get_old_alerts()
     btrx_summaries = requests.get("https://bittrex.com/api/v1.1/public/getmarketsummaries")
-    btrx_summaries = json.loads(btrx_summaries.text)
+    try:
+        btrx_summaries = json.loads(btrx_summaries.text)
+    except Exception as e:
+        print(e)
+        time.sleep(15)
+        continue
 
     for alert in coinigy_alerts['data']['open_alerts']:
         alert['price'] = float(alert['price'])
