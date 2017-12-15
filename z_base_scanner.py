@@ -24,7 +24,6 @@ open("alerts_deleted.txt", "a")
 ##############VARIABLES TO SET
 days = 60 #how far back to look for bases. Suggested at least 14
 skip = 7 #this is how many candles back from now we ignore when scanning for bases; has to be at least 7
-market = "BTC"
 minutes = "60" #candle time interval. suggested 60 for regular base breaks
 drop = .95 #percentage below detected bases to set alert so .96 is 4% down. Suggest at least .96 or .95
 six_candle_up = 1.08 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05
