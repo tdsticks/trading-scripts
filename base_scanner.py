@@ -35,9 +35,23 @@ blacklist = [x.upper().strip() for x in blacklist]
 # and so on but without the pound signs
 
 if len(sys.argv) > 1:
-    exchange = sys.argv[1].upper()
-    minimum_volume = int(sys.argv[2])
-    market = sys.argv[3].upper()
+    days = int(sys.argv[1])
+    skip = int(sys.argv[2])
+    minutes = str(sys.argv[3])
+    drop = float(sys.argv[4])
+    six_candle_up = float(sys.argv[5])
+    sensitivity = int(sys.argv[6])
+    low_or_close = int(sys.argv[7])
+    split_the_difference = sys.argv[8]
+    delete_old_alerts = sys.argv[9]
+    exchange = sys.argv[10].upper()
+    minimum_volume = int(sys.argv[11])
+    market = sys.argv[12].upper()
+
+if split_the_difference == "False":
+    split_the_difference = False
+if delete_old_alerts == "False":
+    delete_old_alerts = False
 
 print(days, skip, minutes, drop, six_candle_up, sensitivity, low_or_close, split_the_difference, delete_old_alerts, exchange, minimum_volume, market)
 
