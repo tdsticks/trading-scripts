@@ -16,10 +16,10 @@ import os
 
 try:
     from api_keys import coinigykey, coinigysec #coinigy api key and secret need to be set in api_keys.py
-    import z_manage_alerts
+    import manage_alerts
     from base_scanner_settings import days, skip, minutes, drop, six_candle_up, sensitivity, low_or_close, split_the_difference, delete_old_alerts, exchange, minimum_volume, market
 except:
-    input("You need to download api_keys.py, put your coinigy keys in it, base_scanner_settings.py, and download z_manage_alerts.py all from the project site")
+    input("You need to download api_keys.py, put your coinigy keys in it, base_scanner_settings.py, and download manage_alerts.py all from the project site")
     sys.exit()
 
 open("alerts_set.txt", "a")
@@ -39,7 +39,7 @@ if len(sys.argv) > 1:
     minimum_volume = int(sys.argv[2])
     market = sys.argv[3].upper()
 
-
+print(days, skip, minutes, drop, six_candle_up, sensitivity, low_or_close, split_the_difference, delete_old_alerts, exchange, minimum_volume, market)
 
 if coinigykey == "---Your-coinigy-key-here---":
     input("You need to put your coinigy key and secret in api_keys.py")
@@ -48,7 +48,7 @@ if coinigykey == "---Your-coinigy-key-here---":
 headers = {'Content-Type': 'application/json', 'X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
 
 #get old alerts
-alerts = z_manage_alerts.AlertManager(coinigykey, coinigysec)
+alerts = manage_alerts.AlertManager(coinigykey, coinigysec)
 old_alerts = alerts._get_old_alerts()
 
 def get_coins(exch_code):
@@ -98,7 +98,7 @@ def setalert(x, y):
             if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + market and line.split("\t")[4].strip() == exchange and not line in alerts_deleted:
                 open("alerts_deleted.txt", "a").write(line)
                 notification_id = line.split("\t")[1].strip()
-                delete_coins = z_manage_alerts.AlertManager(coinigykey, coinigysec)
+                delete_coins = manage_alerts.AlertManager(coinigykey, coinigysec)
                 delete_coins._api_delete_alert(notification_id)
                 time.sleep(1)
 
