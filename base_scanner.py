@@ -1,18 +1,25 @@
 #!/usr/bin/python3
 
+import sys
+try:
+    assert sys.version_info >= (3, 0)
+except:
+    print("Must be ran with Python 3 or greater")
+    sys.exit()
 import urllib
 from urllib.request import urlopen, Request
 import time
 import json
 import decimal
 import os
-import sys
+
+
 try:
     from api_keys import coinigykey, coinigysec #coinigy api key and secret need to be set in api_keys.py
-    import manage_alerts
+    import z_manage_alerts
     from base_scanner_settings import days, skip, minutes, drop, six_candle_up, sensitivity, low_or_close, split_the_difference, delete_old_alerts, exchange, minimum_volume, market
 except:
-    input("You need to download api_keys.py, put your coinigy keys in it, base_scanner_settings.py, and download manage_alerts.py all from the project site")
+    input("You need to download api_keys.py, put your coinigy keys in it, base_scanner_settings.py, and download z_manage_alerts.py all from the project site")
     sys.exit()
 
 open("alerts_set.txt", "a")
@@ -27,34 +34,10 @@ blacklist = [x.upper().strip() for x in blacklist]
 ###################
 # and so on but without the pound signs
 
-##################################################################################################
-#########################     PYTHON 3 is a must Python 2 will not work     ######################
-##################################################################################################
-
-##############VARIABLES TO SET
-"""
-days = 60 #how far back to look for bases. Suggested at least 14
-skip = 12 #this is how many candles back from now we ignore when scanning for bases; has to be at least 7
-minutes = "60" #candle time interval. suggested 60 for regular base breaks
-drop = .95 #percentage below detected bases to set alert so .96 is 4% down. Suggest at least .96 or .95
-six_candle_up = 1.08 #how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05
-sensitivity = 3 #A number 0-6 for how sensitive the scanner is to quality bases. Lower number allows higher quality bases but less of them. 1, 2, or 3 seem to work best
-low_or_close = 3 #whether you want bases based on the low or the close (bottom of wick or candle respectively). 3 gives you low and 4 is close. (Also 0 is open and 1 is high if you want to go there)
-split_the_difference = False #Detects bases at 50% of wicks rather than the low or close prices. Setting this to True will cause the low_or_close variable to be ignored
-delete_old_alerts = True #If you want to delete all old alerts in alerts_set.txt for a coin before creating a new alert for that coin
-"""
 if len(sys.argv) > 1:
     exchange = sys.argv[1].upper()
     minimum_volume = int(sys.argv[2])
     market = sys.argv[3].upper()
-"""
-else:
-    exchange = "BTRX"
-    minimum_volume = 1 #Filters out all coins whose volume (in base coin in the last 24h) is less than this amount
-    market = "BTC"
-"""
-print(days, skip, minutes, drop, six_candle_up, sensitivity, low_or_close, split_the_difference, delete_old_alerts, exchange, minimum_volume, market)
-###############VARIABLES TO SET
 
 
 
@@ -65,7 +48,7 @@ if coinigykey == "---Your-coinigy-key-here---":
 headers = {'Content-Type': 'application/json', 'X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
 
 #get old alerts
-alerts = manage_alerts.AlertManager(coinigykey, coinigysec)
+alerts = z_manage_alerts.AlertManager(coinigykey, coinigysec)
 old_alerts = alerts._get_old_alerts()
 
 def get_coins(exch_code):
@@ -115,7 +98,7 @@ def setalert(x, y):
             if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + market and line.split("\t")[4].strip() == exchange and not line in alerts_deleted:
                 open("alerts_deleted.txt", "a").write(line)
                 notification_id = line.split("\t")[1].strip()
-                delete_coins = manage_alerts.AlertManager(coinigykey, coinigysec)
+                delete_coins = z_manage_alerts.AlertManager(coinigykey, coinigysec)
                 delete_coins._api_delete_alert(notification_id)
                 time.sleep(1)
 
