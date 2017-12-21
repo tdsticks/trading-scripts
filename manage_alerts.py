@@ -14,7 +14,7 @@ class AlertManager:
         self._coinigy_token = coinigy_token
         self.print_output = print_output
 
-    def _get_old_alerts(self):
+    def get_old_alerts(self):
         # get old alerts
         headers = {'Content-Type': 'application/json', 'X-API-KEY': self._coinigy_token.token,
                    'X-API-SECRET': self._coinigy_token.secret}
@@ -47,7 +47,7 @@ class AlertManager:
         :return:
         """
 
-        old_alerts = self._get_old_alerts()
+        old_alerts = self.get_old_alerts()
 
         for alert in old_alerts['data']['open_alerts']:
             if datetime.datetime.strptime(alert['alert_added'], '%Y-%m-%d %H:%M:%S') > newer_than:
@@ -61,7 +61,7 @@ class AlertManager:
         :return:
         """
 
-        old_alerts = self._get_old_alerts()
+        old_alerts = self.get_old_alerts()
 
         for alert in old_alerts['data']['open_alerts']:
             if "z_base_scanner" in alert['alert_note']:
