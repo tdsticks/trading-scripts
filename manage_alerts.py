@@ -4,25 +4,20 @@ import json
 import datetime
 from urllib.request import urlopen, Request
 import time
-from api_keys import coinigykey, coinigysec
 
+import api_keys
+from coinigy import CoinigyToken
 
 
 class AlertManager:
-    def __init__(self, coinigikey, coinigysec, print_output=True):
-        """
-        Object used to manage coinigy alerts
-        :param coinigikey: string, coinigy key
-        :param coinigysec: string, coinigy secret
-        """
-        self.coinigykey = coinigykey
-        self.coinigysec = coinigysec
+    def __init__(self, coinigy_token, print_output=True):
+        self._coinigy_token = coinigy_token
         self.print_output = print_output
 
-    @staticmethod
-    def _get_old_alerts():
+    def _get_old_alerts(self):
         # get old alerts
-        headers = {'Content-Type': 'application/json', 'X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
+        headers = {'Content-Type': 'application/json', 'X-API-KEY': self._coinigy_token.token,
+                   'X-API-SECRET': self._coinigy_token.secret}
         values = '{"exch_code": "BTRX"}'
         values = bytes(values, encoding='utf-8')
         request = Request('https://api.coinigy.com/api/v1/alerts', data=values, headers=headers)
@@ -31,8 +26,7 @@ class AlertManager:
         old_alerts = json.loads(old_alerts)
         return old_alerts
 
-    @staticmethod
-    def _api_delete_alert(alert_id):
+    def _api_delete_alert(self, alert_id):
         """
         Api call to delete alert
         :param alert_id: srting, id of the alert to delete
@@ -40,7 +34,7 @@ class AlertManager:
         """
         body = '{"alert_id": ' + alert_id + '}'
         body = bytes(body, encoding='utf-8')
-        headers = {'Content-Type': 'application/json', 'X-API-KEY': coinigykey, 'X-API-SECRET': coinigysec}
+        headers = {'Content-Type': 'application/json', 'X-API-KEY': self._coinigy_token.token, 'X-API-SECRET': self._coinigy_token.secret}
         request = Request('https://api.coinigy.com/api/v1/deleteAlert', data=body, headers=headers)
         response_body = urlopen(request).read()
         time.sleep(1)
@@ -75,18 +69,19 @@ class AlertManager:
                 if self.print_output:
                     print(resp_body)
 
+
 if __name__ == "__main__":
     ##############VARIABLES TO SET
-    #from_date = datetime.datetime(year=2017, month=12, day=1, hour=23)
+    # from_date = datetime.datetime(year=2017, month=12, day=1, hour=23)
     ##############VARIABLES TO SET
 
-    alerts = AlertManager(coinigykey, coinigysec)
+    alerts = AlertManager(CoinigyToken(token=api_keys.coinigykey, secret=api_keys.coinigysec))
 
-    #alerts.delete_alerts_newer_than(from_date)
+    # alerts.delete_alerts_newer_than(from_date)
     alerts_set = open("alerts_set.txt").readlines()
     [print(line) for line in alerts_set]
     input("Press enter to delete these alerts")
-    #alerts_set = [notification_id.split("\t")[1] for notification_id in alerts_set]
+    # alerts_set = [notification_id.split("\t")[1] for notification_id in alerts_set]
     for notification_id in alerts_set:
         print(notification_id)
         notification_id = notification_id.split("\t")[1]
