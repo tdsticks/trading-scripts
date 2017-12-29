@@ -25,7 +25,7 @@ user_settings = dict(
 
     six_candle_up=Param(
         help="how much higher the sixth candles from the base should be relative to the base. Suggested at least 1.05",
-        value=.08,
+        value=1.08,
     ),
 
     sensitivity=Param(
