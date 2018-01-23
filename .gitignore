@@ -157,3 +157,5 @@ fabric.properties
 
 # Never commit your API keys!
 api_keys.py
+BTC_alerts_set.txt
+ETH_alerts_set.txt

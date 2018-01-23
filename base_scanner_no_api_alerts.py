@@ -4,6 +4,7 @@ import decimal
 import json
 import sys
 import time
+import datetime
 from argparse import ArgumentParser
 from urllib.request import urlopen, Request
 
@@ -67,47 +68,21 @@ class Scanner:
         print("Volume %f" % vol_base)
         # print(min(l))
 
-        # Delete old alerts for this coin
-        if self._settings.delete_old_alerts:
-            alerts_deleted = open("alerts_deleted.txt").readlines()
-            for line in open("alerts_set.txt"):
-                if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + self._settings.market and \
-                        line.split("\t")[
-                            4].strip() == self._settings.exchange and line not in alerts_deleted:
-                    open("alerts_deleted.txt", "a").write(line)
-                    notification_id = line.split("\t")[1].strip()
-                    delete_coins = AlertManager(self._coinigy_token)
-                    delete_coins._api_delete_alert(notification_id)
-                    time.sleep(1)
+        todaysDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # datetime.datetime.today()
+        # print("todaysDate", todaysDate, type(todaysDate))
 
-        alert_note = "%s %i%%" % ("drop", (100 - float(settings_from_file['drop'][0]) * 100))
-        print("alert_note", alert_note)
+        base_candle = str(x)
+        base_price = str(round(decimal.Decimal(y), 8))
+        alert_price = str(round(decimal.Decimal(y * self._settings.drop), 8))
+        volume = vol_base
+        exch_code = self._settings.exchange
+        market_name = coin + ' / ' + self._settings.market
 
-        # sys.exit()
+        writeStr = "%s\t%s\t%s\tBP: %s\tAP: %s\tV: %s\n" % (todaysDate, exch_code, market_name, base_price, alert_price, volume)
+        # print("writeStr", writeStr)
 
-        values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market + '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "'+alert_note+'"}'
-        # values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market + '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "test1"}'
-        # print("values 1:", values)
+        open("alerts_set.txt", "a").write(writeStr)
 
-        values = bytes(values, encoding='utf-8')
-        request = Request('https://api.coinigy.com/api/v1/addAlert', data=values, headers=self._headers)
-        response_body = urlopen(request).read()
-        time.sleep(2)
-        print(response_body)
-        response_body = response_body.decode("utf-8")
-        response_body = json.loads(response_body)
-        new_alert = self._alerts.get_old_alerts()['data']['open_alerts'][-1]
-        time.sleep(2)
-        print(new_alert)
-        if new_alert['mkt_name'] == coin + '/' + self._settings.market:
-            open("alerts_set.txt", "a").write(
-                str(time.time()) + "\t" +
-                new_alert["alert_id"] + "\t" +
-                new_alert["alert_added"] + "\t" +
-                new_alert["price"] + "\t" +
-                new_alert["exch_code"] + "\t" +
-                new_alert["mkt_name"] + "\n"
-            )
 
     def sixup(self, c, x, y, l, coin, vol_base, last_price):
         strikes = 0
