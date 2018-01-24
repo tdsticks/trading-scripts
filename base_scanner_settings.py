@@ -60,6 +60,6 @@ user_settings = dict(
 
     market=Param(
         help="Market to use",
-        value="ETH",
+        value=["BTC","ETH"], # "BNB"
     ),
 )

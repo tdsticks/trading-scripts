@@ -26,22 +26,42 @@ class Scanner:
             'X-API-KEY': self._coinigy_token.token,
             'X-API-SECRET': self._coinigy_token.secret
         }
+        # print("self._headers", self._headers)
+
         self._old_alerts = self._alerts.get_old_alerts()
 
     def get_coins(self, exch_code):
         l = []
+        cl = [] # Coin List
+
         values = '{"exch_code": ' + self._settings.exchange + '}'
         values = bytes(values, encoding='utf-8')
+
         request = Request('https://api.coinigy.com/api/v1/markets', data=values, headers=self._headers)
+
         coin_list = urlopen(request).read()
         time.sleep(1)
         coin_list = coin_list.decode("utf-8")
         coin_list = json.loads(coin_list)
+
         for x in coin_list['data']:
             if x['exch_code'] == exch_code:
                 l.append(x['mkt_name'])
-        l = [x.split('/')[0] for x in l if x.split('/')[1] == self._settings.market]
-        return l
+
+        for coin in l:
+            c = coin.split('/')[0]
+            mkt = coin.split('/')[1]
+            # print(c,mkt)
+
+            if mkt in self._settings.market:
+                # print(c, mkt)
+                cl.append(c)
+        # print("coin list:", cl)
+
+        return cl
+
+        # l = [x.split('/')[0] for x in l if x.split('/')[1] == self._settings.market]
+        # return l
 
     def get_coin_price_volume(self, exchange_code, coin_slash_market):
         values = '{"exchange_code": "' + exchange_code + '","exchange_market": "' + coin_slash_market + '"}'
@@ -60,7 +80,7 @@ class Scanner:
                 return True
         return False
 
-    def setalert(self, x, y, coin, vol_base):
+    def setalert(self, x, y, coin, vol_base, mkt):
         print("Base at candle " + str(x))
         print("Base price " + str(round(decimal.Decimal(y), 8)))
         print("Alert price " + str(round(decimal.Decimal(y * self._settings.drop), 8)))
@@ -71,7 +91,7 @@ class Scanner:
         if self._settings.delete_old_alerts:
             alerts_deleted = open("alerts_deleted.txt").readlines()
             for line in open("alerts_set.txt"):
-                if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + self._settings.market and \
+                if len(line) > 1 and line.split("\t")[5].strip() == coin + "/" + mkt and \
                         line.split("\t")[
                             4].strip() == self._settings.exchange and line not in alerts_deleted:
                     open("alerts_deleted.txt", "a").write(line)
@@ -85,8 +105,10 @@ class Scanner:
 
         # sys.exit()
 
-        values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market + '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "'+alert_note+'"}'
-        # values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market + '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "test1"}'
+        values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + mkt+ \
+                 '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "'+alert_note+'"}'
+        # values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market +
+        # '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "test1"}'
         # print("values 1:", values)
 
         values = bytes(values, encoding='utf-8')
@@ -99,7 +121,7 @@ class Scanner:
         new_alert = self._alerts.get_old_alerts()['data']['open_alerts'][-1]
         time.sleep(2)
         print(new_alert)
-        if new_alert['mkt_name'] == coin + '/' + self._settings.market:
+        if new_alert['mkt_name'] == coin + '/' + mkt:
             open("alerts_set.txt", "a").write(
                 str(time.time()) + "\t" +
                 new_alert["alert_id"] + "\t" +
@@ -109,7 +131,7 @@ class Scanner:
                 new_alert["mkt_name"] + "\n"
             )
 
-    def sixup(self, c, x, y, l, coin, vol_base, last_price):
+    def sixup(self, c, x, y, l, coin, vol_base, last_price, mkt):
         strikes = 0
         if (x < self._settings.skip or x > len(c) - 13): return
         l.append(y)
@@ -141,14 +163,14 @@ class Scanner:
             if c[x + 5] < c[x + 3]: strikes += 1
             print(str(strikes) + " strike(s) against potential base at candle " + str(x))
             if strikes <= self._settings.sensitivity:
-                dupe = self.check_dup_alerts(coin + "/" + self._settings.market, y * self._settings.drop)
+                dupe = self.check_dup_alerts(coin + "/" + mkt, y * self._settings.drop)
                 if dupe:
                     return "nextcoin"
                 if not dupe and last_price > y * self._settings.drop:
-                    self.setalert(x, y, coin, vol_base)
+                    self.setalert(x, y, coin, vol_base, mkt)
                     return "nextcoin"
 
-    def avgthree(self, c, x, y, l, coin, vol_base, last_price):
+    def avgthree(self, c, x, y, l, coin, vol_base, last_price, mkt):
         # print(x)
         # print(y)
         strikes = 0
@@ -182,11 +204,11 @@ class Scanner:
         ):
             print(str(strikes) + " strike(s) against potential base at candle " + str(x))
             if strikes <= self._settings.sensitivity:
-                dupe = self.check_dup_alerts(coin + "/" + self._settings.market, y * self._settings.drop)
+                dupe = self.check_dup_alerts(coin + "/" + mkt, y * self._settings.drop)
                 if dupe:
                     return "nextcoin"
                 if not dupe and last_price > y * self._settings.drop:
-                    self.setalert(x, y, coin, vol_base)
+                    self.setalert(x, y, coin, vol_base, mkt)
                     return "nextcoin"
 
     def _is_blacklisted(self, exchange, coin, market):
@@ -196,58 +218,68 @@ class Scanner:
 
     def scan_for_bases_and_set_alerts(self):
         coins = self.get_coins(self._settings.exchange)
+        # print("coins",coins)
+
+        # sys.exit()
+
         for coin in coins:
-            if self._blacklist and self._is_blacklisted(self._settings.exchange, coin, self._settings.market):
-                print("\n", self._settings.exchange, coin, "blacklisted")
-                continue
-                # coin = "DYN"
-            print("\n" + self._settings.exchange + " " + self._settings.market + " " + coin + " scanning")
-            # input("Press enter to continue")
-            vol_base = self.get_coin_price_volume(self._settings.exchange, coin + '/' + self._settings.market)
-            try:
-                last_price = float(vol_base['data'][0]['last_trade'])
-                vol_base = float(vol_base['data'][0]['current_volume']) * float(vol_base['data'][0]['last_trade'])
-            except:
-                print(vol_base)
-                continue
-            if vol_base < self._settings.minimum_volume:
-                continue
-            print(str(vol_base) + " volume")
 
-            while True:
+            for mkt in self._settings.market:
+                # print("mkt", mkt, "coin", coin)
+
+                if self._blacklist and self._is_blacklisted(self._settings.exchange, coin, mkt):
+                    print("\n", self._settings.exchange, coin, "blacklisted")
+                    continue
+                    # coin = "DYN"
+                print("\n" + self._settings.exchange + " " + mkt + " " + coin + " scanning")
+
+
+                # input("Press enter to continue")
+                vol_base = self.get_coin_price_volume(self._settings.exchange, coin + '/' + mkt)
                 try:
-                    candles = urlopen("https://www.coinigy.com/getjson/chart_feed/" +
-                                      self._settings.exchange + "/" +
-                                      coin + "/" +
-                                      self._settings.market + "/" +
-                                      str(self._settings.minutes) + "/" +
-                                      str(round(time.time() - (int(86400 * self._settings.days)))) + "/" +
-                                      str(round(time.time()))).read().decode("utf-8"
-                                                                             )
-                except Exception as e:
-                    print(e)
-                    print("Will try again in 10 seconds")
-                    time.sleep(10)
+                    last_price = float(vol_base['data'][0]['last_trade'])
+                    vol_base = float(vol_base['data'][0]['current_volume']) * float(vol_base['data'][0]['last_trade'])
+                except:
+                    print(vol_base)
+                    continue
+                if vol_base < self._settings.minimum_volume:
+                    continue
+                print(str(vol_base) + " volume")
+
+                while True:
+                    try:
+                        candles = urlopen("https://www.coinigy.com/getjson/chart_feed/" +
+                                          self._settings.exchange + "/" +
+                                          coin + "/" +
+                                          mkt + "/" +
+                                          str(self._settings.minutes) + "/" +
+                                          str(round(time.time() - (int(86400 * self._settings.days)))) + "/" +
+                                          str(round(time.time()))).read().decode("utf-8"
+                                                                                 )
+                    except Exception as e:
+                        print(e)
+                        print("Will try again in 10 seconds")
+                        time.sleep(10)
+                    else:
+                        break
+
+                time.sleep(2)
+                candles = json.loads(candles)
+
+                if self._settings.split_the_difference:
+                    candles = [(float(x[3]) + float(x[4])) / 2 for x in candles]
                 else:
-                    break
+                    candles = [float(x[self._settings.low_or_close]) for x in candles]
 
-            time.sleep(2)
-            candles = json.loads(candles)
+                l = []
 
-            if self._settings.split_the_difference:
-                candles = [(float(x[3]) + float(x[4])) / 2 for x in candles]
-            else:
-                candles = [float(x[self._settings.low_or_close]) for x in candles]
-
-            l = []
-
-            for x, y in enumerate(candles):
-                if self.sixup(candles, x, y, l, coin, vol_base, last_price) == "nextcoin":
-                    print("sixup")
-                    break
-                if self.avgthree(candles, x, y, l, coin, vol_base, last_price) == "nextcoin":
-                    print("avgthree")
-                    break
+                for x, y in enumerate(candles):
+                    if self.sixup(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
+                        print("sixup")
+                        break
+                    if self.avgthree(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
+                        print("avgthree")
+                        break
 
 
 def main():
