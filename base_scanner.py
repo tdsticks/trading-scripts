@@ -30,10 +30,11 @@ class Scanner:
 
     def get_coins(self, exch_code):
         l = []
-        cl = [] # Coin List
+        cl = {} # Coin List
 
-        values = '{"exch_code": ' + self._settings.exchange + '}'
+        values = '{"exch_code": "' + exch_code + '"}'
         values = bytes(values, encoding='utf-8')
+        print("values:",values)
 
         request = Request('https://api.coinigy.com/api/v1/markets', data=values, headers=self._headers)
 
@@ -41,19 +42,27 @@ class Scanner:
         time.sleep(1)
         coin_list = coin_list.decode("utf-8")
         coin_list = json.loads(coin_list)
+        # print("coin_list:", coin_list)
 
         for x in coin_list['data']:
             if x['exch_code'] == exch_code:
                 l.append(x['mkt_name'])
+        # print("coin_list:", l)
 
+        # Loop through all of the coin from the exchange
         for coin in l:
             c = coin.split('/')[0]
             mkt = coin.split('/')[1]
-            # print(c,mkt)
+            # print("coin:",c,"market:",mkt)
 
+            # Only store what we have in settings
             if mkt in self._settings.market:
                 # print(c, mkt)
-                cl.append(c)
+
+                # Add markets with their coins
+                if mkt not in cl:
+                    cl[mkt] = list()
+                cl[mkt].append(c)
         # print("coin list:", cl)
 
         return cl
@@ -213,17 +222,15 @@ class Scanner:
         coins = self.get_coins(self._settings.exchange)
         # print("coins",coins)
 
-        for coin in coins:
-
-            for mkt in self._settings.market:
-                # print("mkt", mkt, "coin", coin)
+        for mkt in coins:
+            for coin in coins[mkt]:
+                # print("mkt:", mkt, "coin:", coin)
 
                 if self._blacklist and self._is_blacklisted(self._settings.exchange, coin, mkt):
                     print("\n", self._settings.exchange, coin, "blacklisted")
                     continue
                     # coin = "DYN"
                 print("\n" + self._settings.exchange + " " + mkt + " " + coin + " scanning")
-
 
                 # input("Press enter to continue")
                 vol_base = self.get_coin_price_volume(self._settings.exchange, coin + '/' + mkt)
