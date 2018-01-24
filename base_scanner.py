@@ -26,8 +26,6 @@ class Scanner:
             'X-API-KEY': self._coinigy_token.token,
             'X-API-SECRET': self._coinigy_token.secret
         }
-        # print("self._headers", self._headers)
-
         self._old_alerts = self._alerts.get_old_alerts()
 
     def get_coins(self, exch_code):
@@ -59,9 +57,6 @@ class Scanner:
         # print("coin list:", cl)
 
         return cl
-
-        # l = [x.split('/')[0] for x in l if x.split('/')[1] == self._settings.market]
-        # return l
 
     def get_coin_price_volume(self, exchange_code, coin_slash_market):
         values = '{"exchange_code": "' + exchange_code + '","exchange_market": "' + coin_slash_market + '"}'
@@ -100,16 +95,14 @@ class Scanner:
                     delete_coins._api_delete_alert(notification_id)
                     time.sleep(1)
 
+        #
+        # TODO: alert_note still doesn't work with the API for some reason, still need to find out why
+        #
         alert_note = "%s %i%%" % ("drop", (100 - float(settings_from_file['drop'][0]) * 100))
-        print("alert_note", alert_note)
-
-        # sys.exit()
+        # print("alert_note", alert_note)
 
         values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + mkt+ \
                  '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "'+alert_note+'"}'
-        # values = '{"exch_code": "' + self._settings.exchange + '", "market_name": "' + coin + '/' + self._settings.market +
-        # '", "alert_price": ' + str(y * self._settings.drop) + ', "alert_note": "test1"}'
-        # print("values 1:", values)
 
         values = bytes(values, encoding='utf-8')
         request = Request('https://api.coinigy.com/api/v1/addAlert', data=values, headers=self._headers)
@@ -219,8 +212,6 @@ class Scanner:
     def scan_for_bases_and_set_alerts(self):
         coins = self.get_coins(self._settings.exchange)
         # print("coins",coins)
-
-        # sys.exit()
 
         for coin in coins:
 

@@ -20,7 +20,7 @@ user_settings = dict(
 
     drop=Param(
         help="percentage below detected bases to set alert so .96 is 4%% down. Suggest at least .96 or .95",
-        value=1.0,
+        value=.95,
     ),
 
     six_candle_up=Param(
@@ -55,7 +55,7 @@ user_settings = dict(
 
     minimum_volume=Param(
         help="Filters out all coins whose volume (in base coin in the last 24h) is less than this amount",
-        value=250,
+        value=100,
     ),
 
     market=Param(
