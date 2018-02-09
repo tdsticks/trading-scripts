@@ -5,22 +5,22 @@ Param = namedtuple("Param", "value help")
 user_settings = dict(
     days=Param(
         help="how far back to look for bases. Suggested at least 14",
-        value=60,
+        value=1,
     ),
 
     skip=Param(
         help="this is how many candles back from now we ignore when scanning for bases; has to be at least 7",
-        value=12,
+        value=7,
     ),
 
     minutes=Param(
         help="candle time interval. suggested 60 for regular base breaks",
-        value=60,
+        value=5,
     ),
 
     drop=Param(
         help="percentage below detected bases to set alert so .96 is 4%% down. Suggest at least .96 or .95",
-        value=.95,
+        value=1.00,
     ),
 
     six_candle_up=Param(
@@ -50,7 +50,7 @@ user_settings = dict(
 
     exchange=Param(
         help="The exchange to use",
-        value="BINA",
+        value="GDAX",
     ),
 
     minimum_volume=Param(
@@ -60,6 +60,6 @@ user_settings = dict(
 
     market=Param(
         help="Market to use",
-        value=["BTC","ETH"], # "BNB"
+        value=["USD"], # "BTC","ETH","BNB"
     ),
 )

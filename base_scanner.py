@@ -34,7 +34,7 @@ class Scanner:
 
         values = '{"exch_code": "' + exch_code + '"}'
         values = bytes(values, encoding='utf-8')
-        print("values:",values)
+        # print("values:",values)
 
         request = Request('https://api.coinigy.com/api/v1/markets', data=values, headers=self._headers)
 
@@ -64,6 +64,9 @@ class Scanner:
                     cl[mkt] = list()
                 cl[mkt].append(c)
         # print("coin list:", cl)
+
+        if self._settings.exchange == "GDAX":
+            cl['USD'] = ['BTC']
 
         return cl
 
@@ -135,28 +138,24 @@ class Scanner:
 
     def sixup(self, c, x, y, l, coin, vol_base, last_price, mkt):
         strikes = 0
+
         if (x < self._settings.skip or x > len(c) - 13): return
+
         l.append(y)
-        if (c[x - 1] >= y and
-                c[x + 1] >= y and
-                c[x - 2] >= y and
-                c[x + 2] >= y and
-                c[x - 3] > y and
-                c[x + 3] > y and
-                c[x + 4] > y and
-                c[x + 5] > y and
-                c[x + 7] > y and
-                c[x + 8] > y and
-                c[x + 9] > y and
-                c[x + 10] > y and
-                c[x + 11] > y and
-                c[x + 12] > y and
-                y <= min(l) and
-                (c[x - 6] >= y * self._settings.six_candle_up or c[x - 7] >= y * self._settings.six_candle_up) and
-                c[x - 6] - y > 0.00000002 and  # To eliminate false positives for low sat coins like DOGE and RDD
-                (c[x + 6] >= y * self._settings.six_candle_up or c[x + 7] >= y * self._settings.six_candle_up) and
-                c[x + 6] - y > 0.00000002
+
+        # print("sixup", x, y, len(l))
+
+        if (c[x - 1] >= y and c[x + 1] >= y and c[x - 2] >= y and c[x + 2] >= y and
+            c[x - 3] > y and c[x + 3] > y and c[x + 4] > y and c[x + 5] > y and
+            c[x + 7] > y and c[x + 8] > y and c[x + 9] > y and c[x + 10] > y and
+            c[x + 11] > y and c[x + 12] > y and y <= min(l) and
+            (c[x - 6] >= y * self._settings.six_candle_up or c[x - 7] >= y * self._settings.six_candle_up) and
+            c[x - 6] - y > 0.00000002 and  # To eliminate false positives for low sat coins like DOGE and RDD
+            (c[x + 6] >= y * self._settings.six_candle_up or c[x + 7] >= y * self._settings.six_candle_up) and
+            c[x + 6] - y > 0.00000002
         ):
+            print(x,y)
+
             if c[x - 3] < c[x - 1]: strikes += 1
             if c[x - 4] < c[x - 2]: strikes += 1
             if c[x - 5] < c[x - 3]: strikes += 1
@@ -246,14 +245,19 @@ class Scanner:
 
                 while True:
                     try:
-                        candles = urlopen("https://www.coinigy.com/getjson/chart_feed/" +
-                                          self._settings.exchange + "/" +
-                                          coin + "/" +
-                                          mkt + "/" +
-                                          str(self._settings.minutes) + "/" +
-                                          str(round(time.time() - (int(86400 * self._settings.days)))) + "/" +
-                                          str(round(time.time()))).read().decode("utf-8"
-                                                                                 )
+
+                        candlesStr = "https://www.coinigy.com/getjson/chart_feed/" +\
+                                          self._settings.exchange + "/" +\
+                                          coin + "/" +\
+                                          mkt + "/" +\
+                                          str(self._settings.minutes) + "/" +\
+                                          str(round(time.time() - (int(86400 * self._settings.days)))) + "/" +\
+                                          str(round(time.time()))
+                        print("candlesStr", candlesStr)
+
+                        candles = urlopen(candlesStr).read().decode("utf-8")
+                        # print("candles", candles)
+
                     except Exception as e:
                         print(e)
                         print("Will try again in 10 seconds")
@@ -263,6 +267,7 @@ class Scanner:
 
                 time.sleep(2)
                 candles = json.loads(candles)
+                # print("candles", candles)
 
                 if self._settings.split_the_difference:
                     candles = [(float(x[3]) + float(x[4])) / 2 for x in candles]
@@ -271,13 +276,15 @@ class Scanner:
 
                 l = []
 
-                for x, y in enumerate(candles):
-                    if self.sixup(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
-                        print("sixup")
-                        break
-                    if self.avgthree(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
-                        print("avgthree")
-                        break
+                # for x, y in enumerate(candles):
+                #     print("Candles:", x, y)
+
+                    # if self.sixup(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
+                    #     print("sixup")
+                    #     break
+                    # if self.avgthree(candles, x, y, l, coin, vol_base, last_price, mkt) == "nextcoin":
+                    #     print("avgthree")
+                    #     break
 
 
 def main():

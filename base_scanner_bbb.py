@@ -38,10 +38,16 @@ class Scanner:
         time.sleep(1)
         coin_list = coin_list.decode("utf-8")
         coin_list = json.loads(coin_list)
+        # print("coin_list", coin_list)
         for x in coin_list['data']:
             if x['exch_code'] == exch_code:
                 l.append(x['mkt_name'])
+
         l = [x.split('/')[0] for x in l if x.split('/')[1] == self._settings.market]
+
+        if self._settings.exchange == "GDAX":
+            l = ['BTC']
+
         return l
 
     def get_coin_price_volume(self, exchange_code, coin_slash_market):
@@ -171,6 +177,8 @@ class Scanner:
 
     def scan_for_bases_and_set_alerts(self):
         coins = self.get_coins(self._settings.exchange)
+        print("Coins:", coins)
+
         for coin in coins:
             if self._blacklist and self._is_blacklisted(self._settings.exchange, coin, self._settings.market):
                 print("\n", self._settings.exchange, coin, "blacklisted")
